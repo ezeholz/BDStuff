@@ -130,7 +130,8 @@ class dateViewer {
     }
 
     remove() {
-        if (!document.querySelector('#dv-mount'))
+        const header = document.querySelector('#dv-mount');
+        if (!header)
             return;
 
         header.remove();
