@@ -5,7 +5,7 @@ class dateViewer {
     getDescription() { return 'Displays current time, date and day of the week on your right side. The way it\'s displayed depends on your locale conventions.' }
     getVersion() { return '0.2.1'; }
     getAuthor() { return 'hammy'; }
-    getDownloadLink() { return 'https://raw.githubusercontent.com/hammy255/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js'; }
+    getDownloadLink() { return 'https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js'; }
 
     constructor() {
         this.initialized = false;
