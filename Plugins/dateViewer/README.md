@@ -3,7 +3,7 @@ Displays current time, date and day of the week on your right side. The way it's
 
 **Version:** 0.2.1
 
-**Download:** ![Source](https://github.com/hammy255/BDStuff/blob/master/Plugins/dateViewer/dateViewer.plugin.js)
+**Download:** ![Source](https://github.com/hammy1/BDStuff/blob/master/Plugins/dateViewer/dateViewer.plugin.js)
 
 ### Features
 * displaying current time, date and day of the week
