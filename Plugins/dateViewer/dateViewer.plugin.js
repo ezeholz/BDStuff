@@ -71,17 +71,16 @@ class dateViewer {
 
     start() {
         let libraryScript = document.querySelector('#zeresLibraryScript');
-        if (libraryScript)
-            libraryScript.remove();
-
-        libraryScript = document.createElement('script');
-        libraryScript.setAttribute('type', 'text/javascript');
-        libraryScript.setAttribute('src', 'https://rauenzi.github.io/BetterDiscordAddons/Plugins/PluginLibrary.js');
-        libraryScript.setAttribute('id', 'zeresLibraryScript');
-        document.head.appendChild(libraryScript);
+        if (!libraryScript) {
+            libraryScript = document.createElement('script');
+            libraryScript.setAttribute('type', 'text/javascript');
+            libraryScript.setAttribute('src', 'https://rauenzi.github.io/BetterDiscordAddons/Plugins/PluginLibrary.js');
+            libraryScript.setAttribute('id', 'zeresLibraryScript');
+            document.head.appendChild(libraryScript);
+        }
 
         if (typeof window.ZeresLibrary !== 'undefined') this.initialize();
-        else libraryScript.addEventListener('load', function() { this.initialize() });
+        else libraryScript.addEventListener('load', () => this.initialize());
     }
 
     stop() {
@@ -90,7 +89,6 @@ class dateViewer {
     }
 
     initialize() {
-        BdApi.clearCSS(this.getShortName() + '-style');
         BdApi.injectCSS(this.getShortName() + '-style', this.style);
         PluginUtilities.checkForUpdate(this.getName(), this.getVersion(), this.getDownloadLink());
         PluginUtilities.showToast(this.getName() + ' ' + this.getVersion() + ' has started.');
