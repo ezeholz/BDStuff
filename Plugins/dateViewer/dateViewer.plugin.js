@@ -52,7 +52,7 @@ class dateViewer {
                 color: #737f8d;
             }
 
-            .membersWrap-3wRngy .members-1bid1J {
+            .membersWrap-2h-GB4 .members-1998pB {
                 height: calc(100% - 95px);
             }
         `;
@@ -104,7 +104,7 @@ class dateViewer {
     observer(e) {
         if (e.type === 'childList' && e.addedNodes) {
             for (const node of e.addedNodes) {
-                if (node.classList && node.classList.contains('membersWrap-3wRngy'))
+                if (node.classList && node.classList.contains('membersWrap-2h-GB4'))
                     this.append();
 
                 break;
@@ -113,7 +113,7 @@ class dateViewer {
     }
 
     append() {
-        const memberList = document.querySelector('.membersWrap-3wRngy');
+        const memberList = document.querySelector('.membersWrap-2h-GB4');
         if (!memberList || document.querySelector('#dv-mount'))
             return;
 
