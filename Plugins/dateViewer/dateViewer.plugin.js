@@ -1,7 +1,7 @@
 //META{"name":"DateViewer","displayName":"Date Viewer","website":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","source":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"}*//
 
 var DateViewer = (() => {
-    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.4","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Bugs Squashed!","type":"fixed","items":["Actually renders in the memberlist again."]}],"main":"index.js"};
+    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.5","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Bugs Squashed!","type":"fixed","items":["Actually renders in the memberlist again. But this time properly positioned."]},{"title":"Improvements!","type":"improved","items":["Now uses discords css variables."]}],"main":"index.js"};
 
     return !global.ZeresPluginLibrary ? class {
         getName() {return config.info.name;}
@@ -97,9 +97,10 @@ var DateViewer = (() => {
         constructor() {
             super();
 			this.initialized = false;
+			console.log(DiscordSelectors);
 			this.style = `
 				#dv-mount {
-					background-color: #2f3136;
+					background-color: var(--background-secondary);
 					bottom: 0;
 					box-sizing: border-box;
 					display: flex;
@@ -107,14 +108,11 @@ var DateViewer = (() => {
 					justify-content: center;
 					position: absolute;
 					width: 240px;
-					z-index: 256;
 				}
 				#dv-main {
-					--gap: 20px;
-					background-color: transparent;
-					border-top: 1px solid hsla(0, 0%, 100%, .04);
+					border-top: 1px solid var(--background-modifier-accent);
 					box-sizing: border-box;
-					color: #fff;
+					color: var(--text-normal);
 					display: flex;
 					flex-direction: column;
 					height: 100%;
@@ -122,20 +120,13 @@ var DateViewer = (() => {
 					justify-content: center;
 					text-align: center;
 					text-transform: uppercase;
-					width: calc(100% - var(--gap) * 2);
+					width: calc(100% - 40px);
 				}
 				#dv-main .dv-date {
 					font-size: small;
-					opacity: .6;
+					opacity: 0.6;
 				}
-				.theme-light #dv-mount {
-					background-color: #f3f3f3;
-				}
-				.theme-light #dv-main {
-					border-top: 1px solid #e6e6e6;
-					color: #737f8d;
-				}
-				${DiscordSelectors.MemberList.membersWrap} ${DiscordSelectors.MemberList.members} {
+				${DiscordSelectors.MemberList.membersWrap} ${DiscordSelectors.MemberList.members}{
 					height: calc(100% - 95px);
 				}
 			`;
@@ -160,13 +151,10 @@ var DateViewer = (() => {
 				const props = this.getProps(value, "props");
 				if (!props || !props.id || !props.id.startsWith("members")) return value;
 
-				const children = this.getProps(props, "children.props.children");
-				if (!children || !Array.isArray(children)) return value;
-
-				const viewer = React.createElement(WrapBoundary(Viewer), {});
+				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {});
 				const fn = (item) => item && item.type && item.type.displayName && item.type.displayName === "Viewer";
-
-				if (!children.some(fn)) children.push(viewer);
+				
+				if (!Array.isArray(value) || value.some(fn)) return [value, viewer].flat().filter(n => n)
 
 				return value;
 			});
