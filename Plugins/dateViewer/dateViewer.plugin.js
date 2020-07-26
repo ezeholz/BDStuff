@@ -188,4 +188,4 @@ var DateViewer = (() => {
     })(global.ZeresPluginLibrary.buildPlugin(config));
 })();
 
-module.exports = dateViewer;
+module.exports = DateViewer;
