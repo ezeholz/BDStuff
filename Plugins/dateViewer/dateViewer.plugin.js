@@ -1,7 +1,7 @@
-//META{"name":"dateViewer","displayName":"Date Viewer","website":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","source":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"}*//
+//META{"name":"DateViewer","displayName":"Date Viewer","website":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","source":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"}*//
 
-var dateViewer = (() => {
-    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.3","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Evolving?","type":"improved","items":["Now renders using React!"]}],"main":"index.js"};
+var DateViewer = (() => {
+    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.4","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Bugs Squashed!","type":"fixed","items":["Actually renders in the memberlist again."]}],"main":"index.js"};
 
     return !global.ZeresPluginLibrary ? class {
         getName() {return config.info.name;}
@@ -14,12 +14,41 @@ var dateViewer = (() => {
     } : (([Plugin, Api]) => {
         const plugin = (Plugin, Api) => {
 	const {PluginUtilities, DiscordSelectors, WebpackModules, DiscordModules, Patcher, ReactTools} = Api;
+	const Lists = WebpackModules.getByProps("ListThin");
+	
+	const ErrorBoundary = class ErrorBoundary extends DiscordModules.React.Component {
+		constructor(props) {
+			super(props);
+			this.state = {hasError: false};
+		}
+		
+		static getDerivedStateFromError(error) {
+			return {hasError: true};
+		}
+		
+		componentDidCatch(error, info) {
+			console.error(`[${config.info.name}|Error]`, error);
+		}
+		
+		render() {
+			if (this.state.hasError) return DiscordModules.React.createElement('div', { className: 'react-error' }, 'Component Error!');
+			return this.props.children;
+		}
+	};
+			
+	const WrapBoundary = (Original) => {
+		return class Boundary extends DiscordModules.React.Component {
+			render() {
+				return DiscordModules.React.createElement(ErrorBoundary, null, DiscordModules.React.createElement(Original, this.props));
+			}
+		};
+	};
 	
 	const Viewer = class Viewer extends DiscordModules.React.Component {
 		constructor(props) {
 			super(props);
 			this.interval;
-			this.state = { time: 0, date: "", weekday: "" };
+			this.state = {time: "", date: "", weekday: ""};
 			this.update = this.update.bind(this);
 		}
 
@@ -44,27 +73,27 @@ var dateViewer = (() => {
 
 		render() {
 			if (!DiscordModules.SelectedGuildStore.getGuildId()) return null;
-			return DiscordModules.React.createElement('div', {
-				id: 'dv-mount'
+			return DiscordModules.React.createElement("div", {
+				id: "dv-mount"
 			},
-				DiscordModules.React.createElement('div', {
-					id: 'dv-main'
+				DiscordModules.React.createElement("div", {
+					id: "dv-main"
 				},
-					DiscordModules.React.createElement('span', {
-						className: 'dv-time'
+					DiscordModules.React.createElement("span", {
+						className: "dv-time"
 					}, this.state.time),
-					DiscordModules.React.createElement('span', {
-						className: 'dv-date'
+					DiscordModules.React.createElement("span", {
+						className: "dv-date"
 					}, this.state.date),
-					DiscordModules.React.createElement('span', {
-						className: 'dv-weekday'
+					DiscordModules.React.createElement("span", {
+						className: "dv-weekday"
 					}, this.state.weekday)
 				)
 			);
 		}
 	}
 
-    return class dateViewer extends Plugin {
+    return class DateViewer extends Plugin {
         constructor() {
             super();
 			this.initialized = false;
@@ -125,18 +154,19 @@ var dateViewer = (() => {
 		}
 
 		patchMemberList() {
-			const Scroller = WebpackModules.getByDisplayName('VerticalScroller');
+			if (!Lists) return;
 			
-			Patcher.after(Scroller.prototype, 'render', (that, args, value) => {
-				const key = this.getProps(that, 'props.children.2.0.key');
-				if (typeof key === 'string' && key.includes('section-container')) return value;
+			Patcher.after(Lists.ListThin, "render", (that, args, value) => {
+				const props = this.getProps(value, "props");
+				if (!props || !props.id || !props.id.startsWith("members")) return value;
 
-				const children = this.getProps(value, 'props.children.0.props.children.1.2');
+				const children = this.getProps(props, "children.props.children");
 				if (!children || !Array.isArray(children)) return value;
 
-				const viewer = DiscordModules.React.createElement(Viewer, {});
+				const viewer = React.createElement(WrapBoundary(Viewer), {});
+				const fn = (item) => item && item.type && item.type.displayName && item.type.displayName === "Viewer";
 
-				children.push([viewer, null]);
+				if (!children.some(fn)) children.push(viewer);
 
 				return value;
 			});
@@ -157,3 +187,5 @@ var dateViewer = (() => {
         return plugin(Plugin, Api);
     })(global.ZeresPluginLibrary.buildPlugin(config));
 })();
+
+module.exports = dateViewer;
