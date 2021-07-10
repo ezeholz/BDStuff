@@ -1,7 +1,7 @@
 //META{"name":"DateViewer","displayName":"Date Viewer","website":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","source":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"}*//
 
 var DateViewer = (() => {
-    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.5","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Bugs Squashed!","type":"fixed","items":["Actually renders in the memberlist again. But this time properly positioned."]},{"title":"Improvements!","type":"improved","items":["Now uses discords css variables."]}],"main":"index.js"};
+    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.6","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Bugs Squashed!","type":"fixed","items":["Fix multi-patch incompatibility."]}],"main":"index.js"};
 
     return !global.ZeresPluginLibrary ? class {
         getName() {return config.info.name;}
@@ -31,7 +31,7 @@ var DateViewer = (() => {
 		}
 		
 		render() {
-			if (this.state.hasError) return DiscordModules.React.createElement('div', { className: 'react-error' }, 'Component Error!');
+			if (this.state.hasError) return DiscordModules.React.createElement("div", {className: "react-error"}, "Component Error!");
 			return this.props.children;
 		}
 	};
@@ -66,8 +66,8 @@ var DateViewer = (() => {
 			const lang = document.documentElement.lang;
 			this.setState({
 				time: date.toLocaleTimeString(lang),
-				date: date.toLocaleDateString(lang, { day: "2-digit", month: "2-digit", year: "numeric" }),
-				weekday: date.toLocaleDateString(lang, { weekday: "long" })
+				date: date.toLocaleDateString(lang, {day: "2-digit", month: "2-digit", year: "numeric"}),
+				weekday: date.toLocaleDateString(lang, {weekday: "long"})
 			});
 		}
 
@@ -97,7 +97,6 @@ var DateViewer = (() => {
         constructor() {
             super();
 			this.initialized = false;
-			console.log(DiscordSelectors);
 			this.style = `
 				#dv-mount {
 					background-color: var(--background-secondary);
@@ -126,7 +125,7 @@ var DateViewer = (() => {
 					font-size: small;
 					opacity: 0.6;
 				}
-				${DiscordSelectors.MemberList.membersWrap} ${DiscordSelectors.MemberList.members}{
+				${DiscordSelectors.MemberList.membersWrap} ${DiscordSelectors.MemberList.members} {
 					height: calc(100% - 95px);
 				}
 			`;
@@ -148,13 +147,15 @@ var DateViewer = (() => {
 			if (!Lists) return;
 			
 			Patcher.after(Lists.ListThin, "render", (that, args, value) => {
-				const props = this.getProps(value, "props");
+				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
+				const props = this.getProps(val, "props");
 				if (!props || !props.id || !props.id.startsWith("members")) return value;
 
-				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {});
-				const fn = (item) => item && item.type && item.type.displayName && item.type.displayName === "Viewer";
+				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"});
+				const fn = (item) => item && item.key && item.key === "DateViewer-Instance";
 				
-				if (!Array.isArray(value) || value.some(fn)) return [value, viewer].flat().filter(n => n)
+				if (!Array.isArray(value)) value = [value];
+				if (!value.some(fn)) value.push(viewer);
 
 				return value;
 			});
