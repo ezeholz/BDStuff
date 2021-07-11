@@ -145,6 +145,21 @@ var DateViewer = (() => {
 
 		patchMemberList() {
 			if (!Lists) return;
+
+			Patcher.after(WebpackModules.getAllByProps("render")[1], "render", (that, args, value) => {
+				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
+				const props = this.getProps(val, "props");
+				
+				if (!props || !props.className || !props.className.startsWith("members")) return value;
+
+				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"});
+				const fn = (item) => item && item.key && item.key === "DateViewer-Instance";
+				
+				if (!Array.isArray(value)) value = [value];
+				if (!value.some(fn)) value.push(viewer);
+
+				return value;
+			})
 			
 			Patcher.after(Lists.ListThin, "render", (that, args, value) => {
 				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
