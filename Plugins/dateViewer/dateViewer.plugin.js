@@ -106,7 +106,7 @@ var DateViewer = (() => {
 					height: 95px;
 					justify-content: center;
 					position: absolute;
-					width: 240px;
+					width: 100%;
 				}
 				#dv-main {
 					border-top: 1px solid var(--background-modifier-accent);
