@@ -1,7 +1,47 @@
-//META{"name":"DateViewer","displayName":"Date Viewer","website":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","source":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"}*//
+/**
+ * @name DateViewer
+ * @author ezeholz
+ * @authorId 820741927401160714
+ * @version 0.2.7
+ * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
+ * @website https://ezeholz.com.ar/
+ * @source https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer
+ * @updateUrl https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js
+ */
 
 var DateViewer = (() => {
-    const config = {"info":{"name":"Date Viewer","authors":[{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"}],"version":"0.2.6","description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.","github":"https://github.com/hammy1/BDStuff/tree/master/Plugins/dateViewer","github_raw":"https://raw.githubusercontent.com/hammy1/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"},"changelog":[{"title":"Bugs Squashed!","type":"fixed","items":["Fix multi-patch incompatibility."]}],"main":"index.js"};
+    const config = {
+		"info":{
+			"name":"Date Viewer",
+			"authors":[
+				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
+				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
+			],
+			"version":"0.2.7",
+			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
+			"github":"https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer",
+			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"
+		},
+		"changelog": [
+			{
+				"title": "We pass the torch!",
+				"type": "improved",
+				"items": [
+					"Now this looks a lot better. It's the same, but better."
+				]
+			},
+			{
+				"title": "Fixed Almost Everything!",
+				"type": "fixed",
+				"items": [
+					"**Update compatibility with MemberCount**: Now, you don't need to struggle with time AND all those friends you have.",
+					"**Width not hardcoded anymore**: Because we all love those themes that change the width of the members list.",
+					"**Now it should appear in DM's as expected**: Even better if you can't afford paying for a free discord server. Oh, wait, it's free."
+				]
+			},
+		],
+		"main":"index.js"
+		};
 
     return !global.ZeresPluginLibrary ? class {
         getName() {return config.info.name;}
@@ -14,6 +54,7 @@ var DateViewer = (() => {
     } : (([Plugin, Api]) => {
         const plugin = (Plugin, Api) => {
 	const {PluginUtilities, DiscordSelectors, WebpackModules, DiscordModules, Patcher, ReactTools} = Api;
+	const Scroller = WebpackModules.getByProps("ScrollerThin");
 	const Lists = WebpackModules.getByProps("ListThin");
 	
 	const ErrorBoundary = class ErrorBoundary extends DiscordModules.React.Component {
@@ -72,7 +113,7 @@ var DateViewer = (() => {
 		}
 
 		render() {
-			if (!DiscordModules.SelectedGuildStore.getGuildId()) return null;
+			if (!document.getElementsByClassName("members-1998pB")[0]) return null;
 			return DiscordModules.React.createElement("div", {
 				id: "dv-mount"
 			},
@@ -145,11 +186,10 @@ var DateViewer = (() => {
 
 		patchMemberList() {
 			if (!Lists) return;
-
-			Patcher.after(WebpackModules.getAllByProps("render")[1], "render", (that, args, value) => {
+			
+			Patcher.after(Scroller.ScrollerThin, "render", (that, args, value) => {
 				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
 				const props = this.getProps(val, "props");
-				
 				if (!props || !props.className || !props.className.startsWith("members")) return value;
 
 				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"});
