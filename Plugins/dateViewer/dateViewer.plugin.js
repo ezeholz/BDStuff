@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.7
+ * @version 0.2.8
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer
@@ -11,18 +11,18 @@
 
 var DateViewer = (() => {
     const config = {
-		"info":{
+		info:{
 			"name":"Date Viewer",
 			"authors":[
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.7",
+			"version":"0.2.8",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"
 		},
-		"changelog": [
+		changelog: [
 			{
 				"title": "We pass the torch!",
 				"type": "improved",
@@ -39,9 +39,103 @@ var DateViewer = (() => {
 					"**Now it should appear in DM's as expected**: Even better if you can't afford paying for a free discord server. Oh, wait, it's free."
 				]
 			},
+			{
+				"title": "New Stuff!",
+				"type": "added",
+				"items": [
+					"**Settings**: Let's customize those rocky numbers.",
+				]
+			},
 		],
-		"main":"index.js"
-		};
+		defaultConfig: [
+			{
+				type:"category",
+				id:"formatTime",
+				name:"Time Format",
+				collapsible:true,
+				shown:false,
+				settings:[
+					{
+						type:"switch",
+						id:"hour12",
+						name:"12-Hour Format",
+						value:false
+					},
+					{
+						type:"switch",
+						id:"second",
+						name:"Show Seconds",
+						value:true
+					},
+				]
+			},
+			{
+				type:"category",
+				id:"formatDate",
+				name:"Date Format",
+				collapsible:true,
+				shown:false,
+				settings:[
+					{
+						type:"switch",
+						id:"firstMonth",
+						name:"Show Month First",
+						value:true
+					},
+					{
+						type:"switch",
+						id:"year",
+						name:"Show full year",
+						value:true
+					},
+				]
+			},
+			{
+				type:"category",
+				id:"formatWeek",
+				name:"Week Format",
+				collapsible:true,
+				shown:false,
+				settings:[
+					{
+						type:"textbox",
+						id:"monday",
+						name:"Monday",
+					},
+					{
+						type:"textbox",
+						id:"tuesday",
+						name:"Tuesday",
+					},
+					{
+						type:"textbox",
+						id:"wednesday",
+						name:"Wednesday",
+					},
+					{
+						type:"textbox",
+						id:"thursday",
+						name:"Thusday",
+					},
+					{
+						type:"textbox",
+						id:"friday",
+						name:"Friday",
+					},
+					{
+						type:"textbox",
+						id:"saturday",
+						name:"Saturday",
+					},
+					{
+						type:"textbox",
+						id:"sunday",
+						name:"Sunday",
+					},
+				]
+			},
+		]
+	};
 
     return !global.ZeresPluginLibrary ? class {
         getName() {return config.info.name;}
@@ -91,6 +185,7 @@ var DateViewer = (() => {
 			this.interval;
 			this.state = {time: "", date: "", weekday: ""};
 			this.update = this.update.bind(this);
+			this.settings = props.children.settings
 		}
 
 		componentDidMount() {
@@ -105,10 +200,13 @@ var DateViewer = (() => {
 		update() {
 			const date = new Date();
 			const lang = document.documentElement.lang;
+
+			let week = date.toLocaleDateString(lang, {weekday: "long"}).toLowerCase()
+
 			this.setState({
-				time: date.toLocaleTimeString(lang),
-				date: date.toLocaleDateString(lang, {day: "2-digit", month: "2-digit", year: "numeric"}),
-				weekday: date.toLocaleDateString(lang, {weekday: "long"})
+				time: date.toLocaleTimeString(lang, {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
+				date: date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB', {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
+				weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week
 			});
 		}
 
@@ -192,7 +290,7 @@ var DateViewer = (() => {
 				const props = this.getProps(val, "props");
 				if (!props || !props.className || !props.className.startsWith("members")) return value;
 
-				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"});
+				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"}, {settings: Object.assign({},this.settings)});
 				const fn = (item) => item && item.key && item.key === "DateViewer-Instance";
 				
 				if (!Array.isArray(value)) value = [value];
@@ -206,7 +304,7 @@ var DateViewer = (() => {
 				const props = this.getProps(val, "props");
 				if (!props || !props.id || !props.id.startsWith("members")) return value;
 
-				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"});
+				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"}, {settings: Object.assign({},this.settings)});
 				const fn = (item) => item && item.key && item.key === "DateViewer-Instance";
 				
 				if (!Array.isArray(value)) value = [value];
@@ -225,6 +323,14 @@ var DateViewer = (() => {
 
 		getProps(obj, path) {
 			return path.split(/\s?\.\s?/).reduce((object, prop) => object && object[prop], obj);
+		}
+
+		getSettingsPanel(){
+			var panel = this.buildSettingsPanel()
+			panel.addListener(() => {
+                this.updateMemberList();
+            });
+			return panel.getElement();
 		}
 	}
 }
