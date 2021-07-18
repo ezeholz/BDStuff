@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.8
+ * @version 0.2.9
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer
@@ -17,7 +17,7 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.8",
+			"version":"0.2.9",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"
@@ -31,19 +31,11 @@ var DateViewer = (() => {
 				]
 			},
 			{
-				"title": "Fixed Almost Everything!",
-				"type": "fixed",
-				"items": [
-					"**Update compatibility with MemberCount**: Now, you don't need to struggle with time AND all those friends you have.",
-					"**Width not hardcoded anymore**: Because we all love those themes that change the width of the members list.",
-					"**Now it should appear in DM's as expected**: Even better if you can't afford paying for a free discord server. Oh, wait, it's free."
-				]
-			},
-			{
 				"title": "New Stuff!",
 				"type": "added",
 				"items": [
 					"**Settings**: Let's customize those rocky numbers.",
+					"**UTC Switch**: Just for you, a very social person with so many friends around the world.",
 				]
 			},
 		],
@@ -134,6 +126,12 @@ var DateViewer = (() => {
 					},
 				]
 			},
+			{
+				type:"switch",
+				id:"utc",
+				name:"UTC Format",
+				value:false
+			},
 		]
 	};
 
@@ -203,11 +201,40 @@ var DateViewer = (() => {
 
 			let week = date.toLocaleDateString(lang, {weekday: "long"}).toLowerCase()
 
-			this.setState({
-				time: date.toLocaleTimeString(lang, {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
-				date: date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB', {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
-				weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week
-			});
+			if(!this.settings.utc){
+				this.setState({
+					time: date.toLocaleTimeString(lang, {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
+					date: date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB', {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
+					weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week
+				});
+			} else {
+				let utc = date.toISOString().split('T')
+
+				let dateUTC = utc[0].split('-')
+
+				if(this.settings.formatDate.year) this.setState({ date: this.settings.formatDate.firstMonth?`${dateUTC[2]}/${dateUTC[1]}/${dateUTC[0]}`:`${dateUTC[1]}/${dateUTC[2]}/${dateUTC[0]}`,})
+				else this.setState({ date: this.settings.formatDate.firstMonth?`${dateUTC[2]}/${dateUTC[1]}/${dateUTC[0].substring(2, 4)}`:`${dateUTC[1]}/${dateUTC[2]}/${dateUTC[0].substring(2, 4)}`,})
+
+				let timeUTC = utc[1].split('.')[0].split(':')
+
+				if(this.settings.formatTime.hour12) {
+					if(timeUTC[0]>12) this.setState({ time: `${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' PM' })
+					else this.setState({ time: `${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' AM' })
+				}
+				else this.setState({ time: `${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`})
+
+				switch(date.getUTCDay()) {
+					case 0: week = 'sunday'; break;
+					case 1: week = 'monday'; break;
+					case 2: week = 'tuesday'; break;
+					case 3: week = 'wednesday'; break;
+					case 4: week = 'thursday'; break;
+					case 5: week = 'friday'; break;
+					case 6: week = 'saturday'; break;
+				}
+
+				this.setState({weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week});
+			}
 		}
 
 		render() {
