@@ -203,7 +203,7 @@ var DateViewer = (() => {
 
 			if(!this.settings.utc){
 				this.setState({
-					time: date.toLocaleTimeString(lang, {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
+					time: date.toLocaleTimeString('en-GB', {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
 					date: date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB', {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
 					weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week
 				});
@@ -221,7 +221,8 @@ var DateViewer = (() => {
 					if(timeUTC[0]>12) this.setState({ time: `${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' PM' })
 					else this.setState({ time: `${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' AM' })
 				}
-				else this.setState({ time: `${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`})
+				else if(+timeUTC[0]!==24) this.setState({ time: `${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`})
+				else this.setState({ time: `00:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`})
 
 				switch(date.getUTCDay()) {
 					case 0: week = 'sunday'; break;
