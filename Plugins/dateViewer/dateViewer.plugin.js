@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.9
+ * @version 0.2.10
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer
@@ -17,7 +17,7 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.9",
+			"version":"0.2.10",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"
@@ -31,11 +31,11 @@ var DateViewer = (() => {
 				]
 			},
 			{
-				"title": "New Stuff!",
-				"type": "added",
+				"title": "Harder, Better!",
+				"type": "fixed",
 				"items": [
-					"**Settings**: Let's customize those rocky numbers.",
-					"**UTC Switch**: Just for you, a very social person with so many friends around the world.",
+					"**UTC 24hs**: A simple *!* can change everything.",
+					"**Threads Fixed**: That was the last thing that remained from the old code. F",
 				]
 			},
 		],
@@ -311,7 +311,7 @@ var DateViewer = (() => {
 		}
 
 		patchMemberList() {
-			if (!Lists) return;
+			if (!Lists || !Scroller) return;
 			
 			Patcher.after(Scroller.ScrollerThin, "render", (that, args, value) => {
 				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
@@ -330,7 +330,7 @@ var DateViewer = (() => {
 			Patcher.after(Lists.ListThin, "render", (that, args, value) => {
 				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
 				const props = this.getProps(val, "props");
-				if (!props || !props.id || !props.id.startsWith("members")) return value;
+				if (!props || !props.className || !props.className.startsWith("members")) return value;
 
 				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {key: "DateViewer-Instance"}, {settings: Object.assign({},this.settings)});
 				const fn = (item) => item && item.key && item.key === "DateViewer-Instance";
