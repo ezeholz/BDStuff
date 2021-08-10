@@ -164,7 +164,7 @@ var DateViewer = (() => {
 			
 			Patcher.after(Lists.ListThin, "render", (that, args, value) => {
 				const props = this.getProps(value, "props");
-				if (!props || !props.id || !props.id.startsWith("members")) return value;
+				if (!props || !props.className || !props.className.startsWith("members")) return value;
 
 				const viewer = DiscordModules.React.createElement(WrapBoundary(Viewer), {});
 				const fn = (item) => item && item.type && item.type.displayName && item.type.displayName === "Viewer";
