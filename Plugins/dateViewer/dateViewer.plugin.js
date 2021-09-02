@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.10
+ * @version 0.2.11
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer
@@ -17,7 +17,7 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.10",
+			"version":"0.2.11",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"
@@ -31,11 +31,19 @@ var DateViewer = (() => {
 				]
 			},
 			{
-				"title": "Harder, Better!",
+				"title": "New stuff!",
+				"type": "added",
+				"items": [
+					"**Country Language, Welcome back!**: Just undeprecated, I mean, not deprecated anymore!",
+					"**Decide your style**: For those who like to **scream** the time, or just be *fancy* with the day of the week",
+				]
+			},
+			{
+				"title": "Smashed bugs!",
 				"type": "fixed",
 				"items": [
-					"**UTC 24hs**: A simple *!* can change everything.",
-					"**Threads Fixed**: That was the last thing that remained from the old code. F",
+					"**12-hour and UTC showing -12**: Or maybe this is not a bug and...",
+					"**12AM instead of 00AM**: Probably fixed with lang addition. I'm just using js variables, so don't expect fully knowledge in this.",
 				]
 			},
 		],
@@ -59,6 +67,28 @@ var DateViewer = (() => {
 						name:"Show Seconds",
 						value:true
 					},
+					{
+						type:"switch",
+						id:"lang",
+						name:"Prefer use of country defined time",
+						value:false
+					},
+					{
+						type:"textbox",
+						id:"custom",
+						name:"Define custom language tag",
+					},
+					{
+						name: 'Style',
+						id: 'style',
+						type: 'radio',
+						value: 0,
+						options: [
+						  { name: 'Normal text', value: 0 },
+						  { name: 'Bold text', value: 1 },
+						  { name: 'Italic text', value: 2 }
+						]
+					},
 				]
 			},
 			{
@@ -79,6 +109,28 @@ var DateViewer = (() => {
 						id:"year",
 						name:"Show full year",
 						value:true
+					},
+					{
+						type:"switch",
+						id:"lang",
+						name:"Prefer use of country defined date",
+						value:false
+					},
+					{
+						type:"textbox",
+						id:"custom",
+						name:"Define custom language tag",
+					},
+					{
+						name: 'Style',
+						id: 'style',
+						type: 'radio',
+						value: 0,
+						options: [
+						  { name: 'Normal text', value: 0 },
+						  { name: 'Bold text', value: 1 },
+						  { name: 'Italic text', value: 2 }
+						]
 					},
 				]
 			},
@@ -123,6 +175,17 @@ var DateViewer = (() => {
 						type:"textbox",
 						id:"sunday",
 						name:"Sunday",
+					},
+					{
+						name: 'Style',
+						id: 'style',
+						type: 'radio',
+						value: 0,
+						options: [
+						  { name: 'Normal text', value: 0 },
+						  { name: 'Bold text', value: 1 },
+						  { name: 'Italic text', value: 2 }
+						]
 					},
 				]
 			},
@@ -203,8 +266,8 @@ var DateViewer = (() => {
 
 			if(!this.settings.utc){
 				this.setState({
-					time: date.toLocaleTimeString('en-GB', {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
-					date: date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB', {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
+					time: date.toLocaleTimeString(this.settings.formatTime.custom!==undefined?this.settings.formatTime.custom:(this.settings.formatTime.lang?lang:'en-GB'), {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
+					date: date.toLocaleDateString(this.settings.formatDate.custom!==undefined?this.settings.formatDate.custom:(this.settings.formatDate.lang?lang:(this.settings.formatDate.firstMonth?'en-US':'en-GB')), {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
 					weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week
 				});
 			} else {
@@ -219,7 +282,7 @@ var DateViewer = (() => {
 
 				if(this.settings.formatTime.hour12) {
 					if(timeUTC[0]>12) this.setState({ time: `${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' PM' })
-					else this.setState({ time: `${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' AM' })
+					else this.setState({ time: `${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}` + ' AM' })
 				}
 				else if(+timeUTC[0]!==24) this.setState({ time: `${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`})
 				else this.setState({ time: `00:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`})
@@ -246,13 +309,13 @@ var DateViewer = (() => {
 				DiscordModules.React.createElement("div", {
 					id: "dv-main"
 				},
-					DiscordModules.React.createElement("span", {
+					DiscordModules.React.createElement(this.settings.formatTime.style===0?"span":(this.settings.formatTime.style>1?"i":"b"), {
 						className: "dv-time"
 					}, this.state.time),
-					DiscordModules.React.createElement("span", {
+					DiscordModules.React.createElement(this.settings.formatDate.style===0?"span":(this.settings.formatTime.style>1?"i":"b"), {
 						className: "dv-date"
 					}, this.state.date),
-					DiscordModules.React.createElement("span", {
+					DiscordModules.React.createElement(this.settings.formatWeek.style===0?"span":(this.settings.formatTime.style>1?"i":"b"), {
 						className: "dv-weekday"
 					}, this.state.weekday)
 				)
