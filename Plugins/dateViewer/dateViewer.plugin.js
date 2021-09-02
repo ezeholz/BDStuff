@@ -2,11 +2,11 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.11
+ * @version 0.2.12
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
- * @source https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer
- * @updateUrl https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js
+ * @source https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer
+ * @updateUrl https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/dateViewer/dateViewer.plugin.js
  */
 
 var DateViewer = (() => {
@@ -17,10 +17,10 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.11",
+			"version":"0.2.12",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
-			"github":"https://github.com/ezeholz/BDStuff/tree/master/Plugins/dateViewer",
-			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/master/Plugins/dateViewer/dateViewer.plugin.js"
+			"github":"https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer",
+			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/dateViewer/dateViewer.plugin.js"
 		},
 		changelog: [
 			{
@@ -44,6 +44,8 @@ var DateViewer = (() => {
 				"items": [
 					"**12-hour and UTC showing -12**: Or maybe this is not a bug and...",
 					"**12AM instead of 00AM**: Probably fixed with lang addition. I'm just using js variables, so don't expect fully knowledge in this.",
+					"**Handling of lang**: Done the bug, done the fix",
+					"**Week days**: There were some problems, but now it's fixed."
 				]
 			},
 		],
@@ -260,16 +262,24 @@ var DateViewer = (() => {
 
 		update() {
 			const date = new Date();
-			const lang = document.documentElement.lang;
 
-			let week = date.toLocaleDateString(lang, {weekday: "long"}).toLowerCase()
+			const lang = document.documentElement.lang;
+			let week = date.toLocaleDateString('en-US', {weekday: "long"}).toLowerCase()
 
 			if(!this.settings.utc){
-				this.setState({
-					time: date.toLocaleTimeString(this.settings.formatTime.custom!==undefined?this.settings.formatTime.custom:(this.settings.formatTime.lang?lang:'en-GB'), {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
-					date: date.toLocaleDateString(this.settings.formatDate.custom!==undefined?this.settings.formatDate.custom:(this.settings.formatDate.lang?lang:(this.settings.formatDate.firstMonth?'en-US':'en-GB')), {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
-					weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week
-				});
+				try{
+					this.setState({
+						time: date.toLocaleTimeString(this.settings.formatTime.custom!==undefined?this.settings.formatTime.custom:(this.settings.formatTime.lang?lang:'en-GB'), {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
+						date: date.toLocaleDateString(this.settings.formatDate.custom!==undefined?this.settings.formatDate.custom:(this.settings.formatDate.lang?lang:(this.settings.formatDate.firstMonth?'en-US':'en-GB')), {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
+						weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:date.toLocaleDateString(lang, {weekday: "long"}).toLowerCase()
+					});
+				} catch(err){
+					this.setState({
+						time: date.toLocaleTimeString('en-GB', {hour12: this.settings.formatTime.hour12, hour: "2-digit", minute: "2-digit", second: this.settings.formatTime.second? "2-digit":undefined}),
+						date: date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB', {day: "2-digit", month: "2-digit", year: this.settings.formatDate.year?"numeric":"2-digit"}),
+						weekday: this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:date.toLocaleDateString('en-US', {weekday: "long"}).toLowerCase()
+					});
+				}
 			} else {
 				let utc = date.toISOString().split('T')
 
