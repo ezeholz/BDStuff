@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.12
+ * @version 0.2.13
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer
@@ -17,7 +17,7 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.12",
+			"version":"0.2.13",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/dateViewer/dateViewer.plugin.js"
@@ -34,18 +34,14 @@ var DateViewer = (() => {
 				"title": "New stuff!",
 				"type": "added",
 				"items": [
-					"**Country Language, Welcome back!**: Just undeprecated, I mean, not deprecated anymore!",
-					"**Decide your style**: For those who like to **scream** the time, or just be *fancy* with the day of the week",
+					"**UTC and Time Zone changes**: Soon...",
 				]
 			},
 			{
 				"title": "Smashed bugs!",
 				"type": "fixed",
 				"items": [
-					"**12-hour and UTC showing -12**: Or maybe this is not a bug and...",
-					"**12AM instead of 00AM**: Probably fixed with lang addition. I'm just using js variables, so don't expect fully knowledge in this.",
-					"**Handling of lang**: Done the bug, done the fix",
-					"**Week days**: There were some problems, but now it's fixed."
+					"**Keep clock on bottom**: I'm pretty sure it's Discord's fault. But there, fixed."
 				]
 			},
 		],
@@ -364,6 +360,9 @@ var DateViewer = (() => {
 				#dv-main .dv-date {
 					font-size: small;
 					opacity: 0.6;
+				}
+				${DiscordSelectors.MemberList.membersWrap} {
+					height: 100%;
 				}
 				${DiscordSelectors.MemberList.membersWrap} ${DiscordSelectors.MemberList.members} {
 					height: calc(100% - 95px);
