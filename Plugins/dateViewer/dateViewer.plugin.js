@@ -365,8 +365,8 @@ var DateViewer = (() => {
 					font-size: small;
 					opacity: 0.6;
 				}
-				${DiscordSelectors.MemberList.membersWrap} ${DiscordSelectors.MemberList.members} {
-					height: calc(100% - 95px);
+				${DiscordSelectors.MemberList.membersWrap} {
+					height: calc(100%);
 				}
 			`;
         }
