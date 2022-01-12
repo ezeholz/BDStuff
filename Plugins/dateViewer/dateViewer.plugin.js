@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.13
+ * @version 0.2.14
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer
@@ -17,7 +17,7 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.13",
+			"version":"0.2.14",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/dateViewer/dateViewer.plugin.js"
@@ -41,7 +41,8 @@ var DateViewer = (() => {
 				"title": "Smashed bugs!",
 				"type": "fixed",
 				"items": [
-					"**Keep clock on bottom**: I'm pretty sure it's Discord's fault. But there, fixed."
+					"**Keep clock on bottom**: I'm pretty sure it's Discord's fault. But there, fixed.",
+					"**Discord Fault**: Please, don't break anything. Thanks! <3"
 				]
 			},
 		],
@@ -308,7 +309,7 @@ var DateViewer = (() => {
 		}
 
 		render() {
-			if (!document.getElementsByClassName("members-1998pB")[0]) return null;
+			if (!document.getElementsByClassName(DiscordSelectors.MemberList.members.value.replace(/ \./g,''))) return null;
 			return DiscordModules.React.createElement("div", {
 				id: "dv-mount"
 			},
