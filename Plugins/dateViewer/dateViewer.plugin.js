@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.15
+ * @version 0.2.16
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer
@@ -17,7 +17,7 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.15",
+			"version":"0.2.16",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/dateViewer/dateViewer.plugin.js"
@@ -385,7 +385,7 @@ var DateViewer = (() => {
 			if (this.domMode) {
 				clearInterval(this.domMode);
 				document.removeEventListener('click', this.domRenderFunc)
-				document.getElementById('dv-mount').remove()
+				if (document.getElementById('dv-mount')) document.getElementById('dv-mount').remove()
 			}
 			Patcher.unpatchAll();
 			this.updateMemberList();
