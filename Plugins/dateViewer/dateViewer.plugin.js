@@ -2,7 +2,7 @@
  * @name DateViewer
  * @author ezeholz
  * @authorId 820741927401160714
- * @version 0.2.14
+ * @version 0.2.15
  * @description Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.
  * @website https://ezeholz.com.ar/
  * @source https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer
@@ -17,32 +17,35 @@ var DateViewer = (() => {
 				{"name":"hammy","discord_id":"256531049222242304","github_username":"hammy1"},
 				{"name":"ezeholz","discord_id":"820741927401160714","github_username":"ezeholz"}
 			],
-			"version":"0.2.14",
+			"version":"0.2.15",
 			"description":"Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
 			"github":"https://github.com/ezeholz/BDStuff/tree/main/Plugins/dateViewer",
 			"github_raw":"https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/dateViewer/dateViewer.plugin.js"
 		},
 		changelog: [
 			{
-				"title": "We pass the torch!",
+				"title": "Welp, this is embarrasing",
 				"type": "improved",
 				"items": [
-					"Now this looks a lot better. It's the same, but better."
+					"~~Now this looks a lot better. It's the same, but better.~~",
+					"As you might or might not know by now. Discord updated it's software, breaking almost all existing plugins in BD.",
+					"Devs are doing everything in their free time to update plugins. Please be patient."
 				]
 			},
 			{
-				"title": "New stuff!",
+				"title": "It's working, for now",
 				"type": "added",
 				"items": [
-					"**UTC and Time Zone changes**: Soon...",
+					"**Making some core changes**: For now, this plugin it's working. I made some changes and start rendering it at DOM.", "Zere's library is missing some modules that this plugin depends on.",
+					"**What do we do now?**: Just wait and enjoy. Despite the warning at start, everything should be working just fine.", "This is a partial solution to the problem, but by far isn't the finished version."
 				]
 			},
 			{
 				"title": "Smashed bugs!",
 				"type": "fixed",
 				"items": [
-					"**Keep clock on bottom**: I'm pretty sure it's Discord's fault. But there, fixed.",
-					"**Discord Fault**: Please, don't break anything. Thanks! <3"
+					"~~**Discord Fault**: Please, don't break anything. Thanks! <3~~",
+					"**Discord Fault**: Thanks, Discord..."
 				]
 			},
 		],
@@ -379,12 +382,23 @@ var DateViewer = (() => {
 		
         onStop() {
             PluginUtilities.removeStyle(this.getName()  + "-style");
+			if (this.domMode) {
+				clearInterval(this.domMode);
+				document.removeEventListener('click', this.domRenderFunc)
+				document.getElementById('dv-mount').remove()
+			}
 			Patcher.unpatchAll();
 			this.updateMemberList();
 		}
 
 		patchMemberList() {
-			if (!Lists || !Scroller) return;
+			if (!Lists || !Scroller) {
+				window.BdApi.showToast("DateViewer in DOM Mode", {type: "warning", timeout: 5000})
+				this.domMode = setInterval(()=>this.domRender(),1000)
+				this.domRenderFunc = ()=>this.domRender()
+				document.addEventListener('click', this.domRenderFunc)
+				return;
+			}
 			
 			Patcher.after(Scroller.ScrollerThin, "render", (that, args, value) => {
 				const val = Array.isArray(value) ? value.find((item) => item && !item.key) : value;
@@ -420,6 +434,42 @@ var DateViewer = (() => {
 		updateMemberList() {
 			const memberList = document.querySelector(DiscordSelectors.MemberList.members.value.trim());
 			if (memberList) ReactTools.getOwnerInstance(memberList).forceUpdate();
+		}
+
+		domRender() {
+			const memberList = document.querySelector(DiscordSelectors.MemberList.membersWrap.value.trim());
+			if (!memberList) return
+
+			const timeToShow = this.updateTime();
+
+			let time = document.createElement(this.settings.formatTime.style===0?"span":(this.settings.formatTime.style>1?"i":"b")); time.className = "dv-time"; time.innerText = timeToShow.time;
+			let date = document.createElement(this.settings.formatDate.style===0?"span":(this.settings.formatDate.style>1?"i":"b")); date.className = "dv-date"; date.innerText = timeToShow.date;
+			let week = document.createElement(this.settings.formatWeek.style===0?"span":(this.settings.formatWeek.style>1?"i":"b")); week.className = "dv-weekday"; week.innerText = timeToShow.weekday;
+
+			let main = document.createElement('div'); main.id = 'dv-main';
+			[time, date, week].forEach((it)=>{
+				main.appendChild(it)
+			})
+
+			let mount = document.getElementById('dv-mount')
+			if (!mount) {
+				mount = document.createElement('div');
+				mount.id = 'dv-mount';
+				mount.appendChild(main)
+
+				memberList.appendChild(mount)
+			} else {
+				mount.replaceChild(main, mount.firstChild)
+			}
+		}
+
+		updateTime() {
+			const date=new Date();const lang=document.documentElement.lang;let week=date.toLocaleDateString('en-US',{weekday:"long"}).toLowerCase();
+			if(!this.settings.utc){try{return{time:date.toLocaleTimeString(this.settings.formatTime.custom!==undefined?this.settings.formatTime.custom:(this.settings.formatTime.lang?lang:'en-GB'),{hour12:this.settings.formatTime.hour12,hour:"2-digit",minute:"2-digit",second:this.settings.formatTime.second?"2-digit":undefined}),date:date.toLocaleDateString(this.settings.formatDate.custom!==undefined?this.settings.formatDate.custom:(this.settings.formatDate.lang?lang:(this.settings.formatDate.firstMonth?'en-US':'en-GB')),{day:"2-digit",month:"2-digit",year:this.settings.formatDate.year?"numeric":"2-digit"}),weekday:this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:date.toLocaleDateString(lang,{weekday:"long"}).toLowerCase()}}catch(err){return{time:date.toLocaleTimeString('en-GB',{hour12:this.settings.formatTime.hour12,hour:"2-digit",minute:"2-digit",second:this.settings.formatTime.second?"2-digit":undefined}),date:date.toLocaleDateString(this.settings.formatDate.firstMonth?'en-US':'en-GB',{day:"2-digit",month:"2-digit",year:this.settings.formatDate.year?"numeric":"2-digit"}),weekday:this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:date.toLocaleDateString('en-US',{weekday:"long"}).toLowerCase()}}}else{let utc=date.toISOString().split('T');let dateUTC=utc[0].split('-');let response={};let timeUTC=utc[1].split('.')[0].split(':');
+			if(this.settings.formatDate.year)response={date:this.settings.formatDate.firstMonth?`${dateUTC[2]}/${dateUTC[1]}/${dateUTC[0]}`:`${dateUTC[1]}/${dateUTC[2]}/${dateUTC[0]}`,}; else response={date:this.settings.formatDate.firstMonth?`${dateUTC[2]}/${dateUTC[1]}/${dateUTC[0].substring(2, 4)}`:`${dateUTC[1]}/${dateUTC[2]}/${dateUTC[0].substring(2, 4)}`,}
+			if(this.settings.formatTime.hour12){if(timeUTC[0]>12)response={...response,time:`${+timeUTC[0]-12}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`+' PM'}; else response={...response,time:`${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`+' AM'}} else if(+timeUTC[0]!==24)response={...response,time:`${timeUTC[0]}:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`};else response={...response,time:`00:${timeUTC[1]}${this.settings.formatTime.second?':'+timeUTC[2]:''}`}
+			switch(date.getUTCDay()){case 0:week='sunday';break;case 1:week='monday';break;case 2:week='tuesday';break;case 3:week='wednesday';break;case 4:week='thursday';break;case 5:week='friday';break;case 6:week='saturday';break}
+			return{...response,weekday:this.settings.formatWeek[week]!==undefined?this.settings.formatWeek[week]:week}}
 		}
 
 		getProps(obj, path) {
