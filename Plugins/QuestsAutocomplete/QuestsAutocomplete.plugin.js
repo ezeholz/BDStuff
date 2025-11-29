@@ -1,6 +1,6 @@
 /**
  * @name Quests Autocomplete
- * @version 1.1.3
+ * @version 1.1.4
  * @author ezeholz
  * @description Automatically completes Discord quests by fetching and executing code from a trusted Gist.
  * @authorId 820741927401160714
@@ -101,14 +101,14 @@ module.exports = (() => {
 			return jsCode
 		}
 
-        onStart(i=0) {
+        start(i=0) {
 			this.load()
 			this.intervalNum = setInterval(() => {
 				if (this.isQuestAvailable()) {this.questsResolver()}
 			}, 5*1000);
 		}
 
-        onStop() {
+        stop() {
 			clearInterval(this.intervalNum)
 		}
 
