@@ -20,7 +20,7 @@ module.exports = (() => {
                 { name: "hammy", discord_id: "256531049222242304", github_username: "hammy1" },
                 { name: "ezeholz", discord_id: "820741927401160714", github_username: "ezeholz" }
             ],
-            version: "0.1.0",
+            version: "0.4.0",
             description: "Displays current time, date and day of the week on your right side. The way it's displayed depends on your locale conventions.",
             github: "https://github.com/ezeholz/BDStuff/tree/main/Plugins/BetterDateViewer",
             github_raw: "https://raw.githubusercontent.com/ezeholz/BDStuff/main/Plugins/BetterDateViewer/BetterDateViewer.plugin.js"
