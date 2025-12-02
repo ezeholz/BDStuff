@@ -1,6 +1,6 @@
 /**
  * @name BetterUpdater
- * @version 0.0.1
+ * @version 0.0.2
  * @author ezeholz
  * @description Automatically checks for updates for non-official BetterDiscord plugins from GitHub repositories.
  * @authorId 820741927401160714
@@ -57,7 +57,7 @@ module.exports = (() => {
             }).then(result => {
                 const remoteVersion = this.constructor.versioner(result);
                 const hasUpdate = this.constructor.comparator(plugin.version, remoteVersion);
-                if (hasUpdate) {
+                if (hasUpdate && !this.pending.find(p => p.name === plugin.name)) {
                     this.pending.push(plugin);
                     this.showUpdateNotice();
                 }

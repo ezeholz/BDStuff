@@ -4,7 +4,7 @@ Displays current time, date, and day of the week on the bottom of the member lis
 
 **Version:** 0.4.0
 
-**Download:** [Source](https://github.com/ezeholz/BDStuff/blob/master/Plugins/BetterDateViewer/BetterDateViewer.plugin.js)
+**Download:** [Source](https://github.com/ezeholz/BDStuff/blob/main/Plugins/BetterDateViewer/BetterDateViewer.plugin.js)
 
 ### Preview
 
