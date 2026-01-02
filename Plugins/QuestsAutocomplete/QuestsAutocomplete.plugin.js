@@ -1,6 +1,6 @@
 /**
  * @name Quests Autocomplete
- * @version 1.1.4
+ * @version 1.2.0
  * @author ezeholz
  * @description Automatically completes Discord quests by fetching and executing code from a trusted Gist.
  * @authorId 820741927401160714
@@ -31,16 +31,15 @@ module.exports = (() => {
 			})
 
 			const questsStoreBlock = content.match(/let\s*QuestsStore\s*=\s*[\s\S]*?\n/)[0].trim();
-			const questBlock = content.match(/let\s*quest\s*=\s*[\s\S]*?\n/)[0].trim();
+			const supportedTasks = content.match(/const\s*supportedTasks\s*=\s*[\s\S]*?\n/)[0].trim();
+			const questBlock = content.match(/let\s*quests\s*=\s*[\s\S]*?\n/)[0].trim();
 			
 			this.isQuestAvailable = function (){
-				eval(`
+				return eval(`
 					${questsStoreBlock}
+					${supportedTasks}
 					${questBlock}
-					if (quest && this.lastQuestId != quest.config.application.id) {
-						this.lastQuestId = quest.config.application.id
-						this.questsResolver()
-					}
+					quests.length > 0
 					`)
 			}
 
@@ -97,14 +96,20 @@ module.exports = (() => {
 				}
 			}
 
-
 			return jsCode
 		}
 
         start(i=0) {
 			this.load()
+			this.running = false
 			this.intervalNum = setInterval(() => {
-				if (this.isQuestAvailable()) {this.questsResolver()}
+				if (this.running) return
+				if (this.isQuestAvailable()) {
+					this.running = true
+					this.questsResolver()
+				} else {
+					this.running = false
+				}
 			}, 5*1000);
 		}
 
