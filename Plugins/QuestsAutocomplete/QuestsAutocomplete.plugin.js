@@ -1,6 +1,6 @@
 /**
  * @name Quests Autocomplete
- * @version 1.2.0
+ * @version 1.3.0
  * @author ezeholz
  * @description Automatically completes Discord quests by fetching and executing code from a trusted Gist.
  * @authorId 820741927401160714
@@ -30,13 +30,13 @@ module.exports = (() => {
 				throw new Error(err);
 			})
 
-			const questsStoreBlock = content.match(/let\s*QuestsStore\s*=\s*[\s\S]*?\n/)[0].trim();
+			const questsStoreBlock = content.match(/(let\s*)?QuestsStore\s*=\s*[\s\S]*?\n/)[0].trim().replace(/^let /,'');
 			const supportedTasks = content.match(/const\s*supportedTasks\s*=\s*[\s\S]*?\n/)[0].trim();
 			const questBlock = content.match(/let\s*quests\s*=\s*[\s\S]*?\n/)[0].trim();
 			
 			this.isQuestAvailable = function (){
 				return eval(`
-					${questsStoreBlock}
+					let ${questsStoreBlock}
 					${supportedTasks}
 					${questBlock}
 					quests.length > 0
@@ -75,9 +75,11 @@ module.exports = (() => {
 
 			// Step C: Replace with BdApi modules
 			jsCode = jsCode.replace(/delete\s*window\.\$[\s\S]*?\n{2}/, '')
-			jsCode = jsCode.replaceAll(/Object\.values\(wpRequire\.c\)\.find\(x => x\?\.exports\?\.(?:ZP?|tn)\?(?:\.__proto__\?)?\./g, 'BdApi.Webpack.getByKeys("')
-			jsCode = jsCode.replaceAll(/get\)\.exports\.(?:tn)/g, 'tn", "K0").tn')
-			jsCode = jsCode.replaceAll(/\)\.exports\.(?:ZP?)/g, '")')
+			jsCode = jsCode.replaceAll(/Object\.values\(wpRequire\.c\)\.find\(x => x\?\.exports\?\.(?:ZP?|tn|Ay?|h|Bo)\?(?:\.__proto__\?)?\./g, 'BdApi.Webpack.getByKeys("')
+			jsCode = jsCode.replaceAll(/get\)\.exports\.(?:tn|Bo)/g, 'get", "post", "put", "patch", "delete")[1]')
+			jsCode = jsCode.replace('getByKeys("get", "post"', 'getAllByKeys("get", "post"')
+			jsCode = jsCode.replace('BdApi.Webpack.getByKeys("flushWaitQueue")', 'QuestsStore._dispatcher')
+			jsCode = jsCode.replaceAll(/\)\??\.exports\??\.(?:ZP?|Ay?|h)/g, '")')
 	
 			// Step D: Check for compromised gist
 			const suspiciousPatterns = [
