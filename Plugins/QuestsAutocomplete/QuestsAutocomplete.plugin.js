@@ -1,6 +1,6 @@
 /**
  * @name Quests Autocomplete
- * @version 1.3.0
+ * @version 1.3.1
  * @author ezeholz
  * @description Automatically completes Discord quests by fetching and executing code from a trusted Gist.
  * @authorId 820741927401160714
@@ -26,8 +26,8 @@ module.exports = (() => {
 
 		async load() {
 			let content = await this.constructor.grabGistCode().catch((err)=>{
-				BdApi.alert(err.message, err)
-				throw new Error(err);
+				BdApi.UI.alert(err.message, err)
+				// throw new Error(err);
 			})
 
 			const questsStoreBlock = content.match(/(let\s*)?QuestsStore\s*=\s*[\s\S]*?\n/)[0].trim().replace(/^let /,'');
@@ -51,7 +51,7 @@ module.exports = (() => {
 						${content}
 					} catch (error) {
 						console.error('Error executing Gist code:', error);
-						BdApi.alert('Error executing Gist code', error)
+						BdApi.UI.alert('Error executing Gist code', error)
 					}
 					})();`;
 
@@ -76,10 +76,9 @@ module.exports = (() => {
 			// Step C: Replace with BdApi modules
 			jsCode = jsCode.replace(/delete\s*window\.\$[\s\S]*?\n{2}/, '')
 			jsCode = jsCode.replaceAll(/Object\.values\(wpRequire\.c\)\.find\(x => x\?\.exports\?\.(?:ZP?|tn|Ay?|h|Bo)\?(?:\.__proto__\?)?\./g, 'BdApi.Webpack.getByKeys("')
-			jsCode = jsCode.replaceAll(/get\)\.exports\.(?:tn|Bo)/g, 'get", "post", "put", "patch", "delete")[1]')
-			jsCode = jsCode.replace('getByKeys("get", "post"', 'getAllByKeys("get", "post"')
-			jsCode = jsCode.replace('BdApi.Webpack.getByKeys("flushWaitQueue")', 'QuestsStore._dispatcher')
+			jsCode = jsCode.replaceAll(/get\)\.exports\.(?:tn|Bo)/g, 'tn", "K0")?.tn || BdApi.Webpack.getByKeys("Bo", "Cu").Bo')
 			jsCode = jsCode.replaceAll(/\)\??\.exports\??\.(?:ZP?|Ay?|h)/g, '")')
+			jsCode = jsCode.replaceAll('BdApi.Webpack.getByKeys("flushWaitQueue")', 'QuestsStore._dispatcher')
 	
 			// Step D: Check for compromised gist
 			const suspiciousPatterns = [
